@@ -1,0 +1,10 @@
+# Python venvs
+.venv/
+venv/
+env/
+venv-*/
+env-*/
+
+# (opcional) cache do Python
+__pycache__/
+*.pyc
