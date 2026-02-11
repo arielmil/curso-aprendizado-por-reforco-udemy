@@ -8,7 +8,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import torch.autograd as autograd
-from torch.autograd import Variable
 
 # Criação da arquitetura da rede neural
 class Network(nn.Module):
@@ -41,8 +40,13 @@ class ReplayMemory(object):
             
     def sample(self, batch_size):
         # ((1,2,3), (4,5,6)) -> ((1,4), (2,5), (3,6))
-        samples = zip(*random.sample(self.memory, batch_size))
-        return map(lambda x: Variable(torch.cat(x, 0)), samples)
+        batch = random.sample(self.memory, batch_size)
+        batch_state, batch_next_state, batch_action, batch_reward = zip(*batch)
+        batch_state = torch.cat(batch_state, 0)
+        batch_next_state = torch.cat(batch_next_state, 0)
+        batch_action = torch.cat(batch_action, 0)
+        batch_reward = torch.cat(batch_reward, 0)
+        return batch_state, batch_next_state, batch_action, batch_reward
         
 # Implementação de Deep Q-Learning
 class Dqn():
@@ -52,15 +56,17 @@ class Dqn():
         self.model = Network(input_size, nb_action)
         self.memory = ReplayMemory(100000)
         self.optimizer = optim.Adam(self.model.parameters(), lr = 0.001)
-        self.last_state = torch.Tensor(input_size).unsqueeze(0)
+        self.last_state = torch.zeros(input_size).unsqueeze(0)
         self.last_action = 0
         self.last_reward = 0
         
     def select_action(self, state):
-        # sofmax(1,2,3) -> (0.04, 0.11, 0.85) -> (0, 0.02, 0.98)
-        probs = F.softmax(self.model(Variable(state, volatile = True)) * 100) # T = 7
-        action = probs.multinomial()
-        return action.data[0,0]
+        # softmax(1,2,3) -> (0.04, 0.11, 0.85) -> (0, 0.02, 0.98)
+        with torch.no_grad():
+            logits = self.model(state) * 100  # T = 7
+            probs = F.softmax(logits, dim=1)
+        action = probs.multinomial(num_samples=1)
+        return action.item()
     
     def learn(self, batch_state, batch_next_state, batch_reward, batch_action):
         outputs = self.model(batch_state).gather(1, batch_action.unsqueeze(1)).squeeze(1)
@@ -68,13 +74,17 @@ class Dqn():
         target = self.gamma * next_outputs + batch_reward
         td_loss = F.smooth_l1_loss(outputs, target)
         self.optimizer.zero_grad()
-        td_loss.backward(retain_variables = True)
+        td_loss.backward()
         self.optimizer.step()
         
     def update(self, reward, new_signal):
-        new_state = torch.Tensor(new_signal).float().unsqueeze(0)
-        self.memory.push((self.last_state, new_state, torch.LongTensor([int(self.last_action)]),
-                     torch.Tensor([self.last_reward])))
+        new_state = torch.tensor(new_signal, dtype=torch.float32).unsqueeze(0)
+        self.memory.push((
+            self.last_state,
+            new_state,
+            torch.LongTensor([int(self.last_action)]),
+            torch.tensor([self.last_reward], dtype=torch.float32),
+        ))
         action = self.select_action(new_state)
         if len(self.memory.memory) > 100:
             batch_state, batch_next_state, batch_action, batch_reward = self.memory.sample(100)

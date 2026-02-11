@@ -1,0 +1,60 @@
+Deep Q-Learning:
+
+
+    Utiliza redes neurais junto ao algorítimo do Q-Learning.
+    
+    A entrada da rede neural é um estado do ambiente, 
+    que é codificado em um array contendo todas as informações sobre o estado.
+    Pode ser por exemplo uma posição (X, Y, Z) dentro do ambiente do problema.
+
+    A camada de saída da rede neural terá o número de neuronios igual a todos estados alcançaveis,
+    a partir de um estado que tenha o maior número de estados adjacentes.
+
+    Ou seja, cada neuronio representará um valor Q'(S', A') de um desses estados adjacentes,
+    A rede nerual deve aprender a prever bons valores de Q para que usando o Q-Learning,
+    o agente possa encontrar as formas ótimas de resolver o problema em questão.
+
+    Como no Q-Learning, deve-se selecionar o maior dos Q' calculados pela rede neural, para ser o valor Q do estado S sendo avaliado.
+
+
+    A diferença temporal ocorre da seguinte maneira:
+
+        A rede neural preve um valor Q para um determinado estado, e esse valor Q é armazenado na memória.
+        Posteriormente quando o agente revisitar este estado, um novo valor Q será calculado,
+        e os valores Q de antes e depois serão comparados.
+
+        Em um determinado estado S com vários estados S' adjacentes, 
+        a rede neural irá comparar cada valor Q'(S', A') gerado no estado S, com um valor Q'_target,
+        que já tinha sido calculado anteriormente.
+
+    Pode-se modelar uma função custo (Loss) da seguinte maneira:
+
+        L = Somatório((Q'_target - Q')^2) / N | N = Número de Q'.
+        
+        Pergunta: Se o objetivo é aproximar cada Q' de seus respectivos Q'_target, 
+                  os valores de Q'_target já são conhecidos. Sendo assim, por que precisa de treinamento para aprender Q'?
+
+    O processo ocorre toda vez que o agente muda de estado,
+    ou toda vez que o agente realiza um determinado número de mudança de estados (Em batch).
+    No segundo caso, isso é feito para melhorar a performance e evitar o overfitting.
+
+Ação:
+
+    Na última camada, será aplicada a função de ativação Softmax que transformara cada valor de neuronio da camada em uma probabilidade,
+    que representa a probabilidade do agente tomar a ação A que faz ele ir para o estado S, em Q(S, A).
+
+    Cada vez que o agente "morre" ou completa o seu objetivo, uma nova época começa.
+
+
+Políticas de Seleção de Ações:
+
+    Idealmente, o agente deve unir Exploration e Exploitation. Isto é,
+    ele deve estar contínuamente explorando o ambiente, mas sempre procurando também as ações que mais maximizem a sua recompensa.
+    Uma recompensa (futura) porém, pode ser maior caso o agente decida localmente tomar uma decisão não ótima
+
+    Usando a função de ativação softmax, é possível unir esses dois conceitos,
+    pois apesar da rede atribuir uma maior probabilidade a ações ótimas, 
+    as outras ações não ótimas tem uma probabilidade não nula de ocorrer,
+    isso permite que a rede neural tenda a escolher a ação de maior recompensa,
+    mas não impede que eventualmente ela possa escolher outras ações (de menor probabilidade),
+    para continuar explorando o ambiente, e possívelmente chegar numa recompensa maior ainda.

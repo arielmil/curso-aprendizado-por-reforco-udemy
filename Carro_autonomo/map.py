@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Criação do mapa e do carro autônomo
 
 # Importação das bibliotecas
