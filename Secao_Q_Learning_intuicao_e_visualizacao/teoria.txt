@@ -79,7 +79,7 @@ Markov Decision Process (MDP):
     
         P(S, A, S'): Probabilidade de estando no estado S, tomar a ação A e ir com isso para o estado S'.
 
-        V(S) = max(R(S, A) + γ*Somatório(P(S, A, S') * V(S')) Para todo S' alcançavel a partir de S.
+        V(S) = max(R(S, A) + γ*Somatório(P(S, A, S') * V(S'))) Para todo S' alcançavel a partir de S.
         
         OBS: Pode existir um conjunto de estados alcançaveis a partir de S pela ação A,
         e outro conjunto de estados alcançaveis a partir de S pela ação A2, por isso o max entra na formula.
@@ -137,9 +137,56 @@ Adição de Penalidades:
 
 Q-Learning:
 
-    Em Q-Learning, olha-se para o valor Q (Qualidade) de cada ação A que gerá uma mudança de estado.
-    O objetivo é proucrar a ação de maior valor Q, essa será a ação escolhida pelo agente 
+    Em Q-Learning, olha-se para o valor Q (Qualidade) de cada ação A que gerá uma mudança de estado, a partir do estado atual.
+    O objetivo é proucrar a ação de maior valor Q, essa será a ação escolhida pelo agente.
     (Que pode não ocorrer em um cenário de busca não deterministica).
     
+    É usado para calcular o valor V dos estados S
+
+    Quando o agente está no estado S, ele deve avaliar todas as possiveis ações A que podem ser feitas a partir de S,
+    e associar um valor Q a cada uma delas.
+
+    O valor V do estado S em que o agente está, será o maior valor Q avaliado entre as ações.
+
+    Esse valor Q entra na parte R(S, A) na formula da equação de Bellman.
+
+     A formula para definir o valor Q é:
+
+        Q(S, A) = R(S, A) + γ*Somatório(P(S, A, S') * max(Q(S', A'))) Para todo S' e todo A'
+
+        A: Ação que se pode tomar em S,
+        S: Estado sendo medido
+        S': próximo estado alcançavel a partir de s
+        A': Ação que se pode tomar em S'
 
 Diferença Temporal:
+
+    É o coração do Q Learning, e é como todos os tópicos acima se unem.
+    Permite que o agente calcule os valores V e Q de cada estado.
+
+    A medida em que o agente interage com o ambiente, os valores de Q dos estados vão sendo atualizados.
+
+    Existe um valor Q(S, A) conhecido antes do agente chegar naquele estado alguma vez,
+    Existe um valor Q'(S, A) = R(S, A) + γ*max(Q(S', A')) para todo S', que será conhecido quando o agente chegar naquela posição,
+    este será o novo valor de Q.
+
+    A fórmula da diferença temporal é:
+
+        TD(S, A) = Q' - Q = Q(S, A) - R(S, A) + γ*max(Q(S', A'))
+
+        OBS: Aqui retirei a parte do somatório das probabilidades, mas na realidade, 
+             acredito que a formula de Q' possúi esse componente.
+
+    O nome diferença temporal (TD) vem de que se está calculando o valor Q do mesmo estado, em dois momentos diferentes (Qi e Qf)]
+
+    Assim como em uma rede neural treinada por datasets, o objetivo é aprender o melhor valor dos pesos e biases,
+    no aprendizado por reforço, o objetivo é aprender os melhores valores de Q para cada estado.
+
+    O novo valor Q do estado S será:
+
+        Q_novo(S, A) = Q_anterior(S, A) + α*TD(S, A), aonde α: Learning Rate.
+
+        A medida em que o agente treina a partir do algorítimo, o valor de TD(A, A) vai se aproximando de 0,
+        pois Q' será muito próximo de Q.
+
+        Isso indica que o algorítimo está convergindo para achar o melhor valor de Q para aquele estado.
