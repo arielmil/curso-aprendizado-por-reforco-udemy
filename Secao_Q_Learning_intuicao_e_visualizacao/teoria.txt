@@ -1,0 +1,145 @@
+Aprendizado por reforço:
+
+    IA Não depende de um dataset para treinar,
+    ela treina em um determinado ambiente e aprende de acordo com as suas interações nesse ambiente.
+
+    (Parecido como  humanos aprendem)
+
+
+    Agente:  "Ser" artificial que deve realizar tarefas e aprende como realizar elas
+
+             O agente atua atravez de ações no ambiente, 
+             que geram uma mudança de estado e uma recompensa ou punição (Recompensa negativa),
+             de acordo com o resultado esperado pelo programador.
+             O objetivo é fazer o agente aprender quais ações levam as melhores recompensas,
+             que estarão associadas a resolução do problema em que o agente é aplicado.
+
+             O agente aprende do zero, isto é, não existe uma pré programação nele e ele deve aprender tudo sozinho
+
+Equação de Bellman:
+
+    Conceitos:
+
+        S: Estado:
+        V: Valor de um estado
+        A: ação
+        R: Recompensa
+        γ: Desconto
+
+        R(S,A): Tomando uma ação A, vai-se para o estado S ganhando uma recompensa R(S, A).
+            
+            OBS: Até agora, a recompensa é dada apenas no estado final do ambiente.
+
+        V(S): O valor de um determinado estado S.
+
+    Equação (Simplificada?):
+
+        V(S) = max(R(S, A) +  γ*V(S')):
+            max indica que o agente deve executar a ação que de a maior recompensa a partir do estado que ele está,
+            já que ele pode ter mais de uma ação que ele pode fazer.
+
+            S': Estado seguinte alcançavel a partir de S.
+
+            Ou seja, para calcular o valor do estado S, deve-se considerar o(s) próximo(s) estado(s) alcançavel(veis) a partir de S,
+            E o valor da recompensa do próprio estado S.
+
+            o Desconto serve para estados mais próximos do objetivo terem valores maiores do que estados mais distantes, já que no geral, γ < 1.
+
+
+O "Plano":
+
+    Ao se estar em um ambiente com multiplos estados, depois de calcular o valor V(S) de cada estado S,
+    o "Plano" é o agente seguir um fluxo de estados em que ele sempre escolha ir para próximo estado que tenha o maior valor,
+    a partir do estado em que ele está. 
+    Essa lógica pode ser representado por flexas em cada estado, ou seja: 
+    cada estado possúi uma flexa que apontará para o próximo estado de maior valor.
+    O Plano do agente é seguir essas flexas até chegar no estado final, o objetivo.
+
+Markov Decision Process (MDP):
+
+    Fornecem uma estrutura matemática para modelar a tomada de decisões em situações onde os resultados são parcialmente aleatórios,
+    e parcialmente sob o controle de um tomador de decisão, ocorre em buscas não deterministicas.
+
+    Busca determinística:
+
+        O que o agente decide fazer, ele vai fazer pois tem 100% de chance de ele executar essa ação.
+
+    Busca não determinística:
+
+        O agente pode não fazer o que ele decidiu fazer, pois existem probabilidades não nulas de ele acabar executando outra ação
+        (Processo Estocástico)
+
+    Markov Process:
+
+        Um processo estocástico possúi a propriedade Markov, se a seleção do próximo estado,
+        depende apenas do estado atual, e não da sequência de estados / eventos que o precedeu.
+        Um processo com essa propriedade é chamado de processo Markov.
+    
+    Formula do MDP:
+    
+        P(S, A, S'): Probabilidade de estando no estado S, tomar a ação A e ir com isso para o estado S'.
+
+        V(S) = max(R(S, A) + γ*Somatório(P(S, A, S') * V(S')) Para todo S' alcançavel a partir de S.
+        
+        OBS: Pode existir um conjunto de estados alcançaveis a partir de S pela ação A,
+        e outro conjunto de estados alcançaveis a partir de S pela ação A2, por isso o max entra na formula.
+         
+
+Politica x Plano:
+
+    Contexto de busca não deterministica (estocástica)
+
+    Dado que em uma busca não deterministica, a escolha de uma ação para a transição de um estado, 
+    não garante com 100% de certeza que o agente irá para aquele estado, um plano fixo como era o caso da busca deterministica, 
+    não é mais o suficiente pela natureza randomica do ambiente.
+
+    Entra então o conceito de política, 
+    que é uma espécie de regra de decisão que o agente toma em cada estado.
+    Cada estado terá uma regra de decisão, podendo ou não ser a mesma regra de decisão de outros estados.
+
+    Por exemplo:
+
+        Se estiver em um labirinto num corredor, o agente segue a direita,
+        se estiver em um cruzamento, seguir reto,
+        se bater numa parede acima, voltar.
+
+    Exemplo 2:
+
+        Se estiver em um ambiente aonde deve-se evitar um estado que mata o agente, e o agente deve chegar no estado final:
+        Estando em um estado que fica próximo do estado da morte, pode fazer mais sentido "dar a volta" para evitar o fogo,
+        já que existem chances não nulas do agente ir para o estado da morte (busca não deterministica),
+        caso ele passe por estados que ficam adjacentes ao estado da morte.
+        O agente pode decidir também ficar "quicando" (Indo para a parede e voltando) em um estado adjacente ao estado da morte,
+        até ele acabar executando a ação de ir para outro estado.
+
+        (Ver por que a melhor politica não seria dar a volta, ao invés de ficar quicando).
+
+    O agente então deve aprender quais são as melhores ações (ou probabilidades de ações) em cada estado, 
+    formando uma política que maximize a recompensa esperada.
+
+Adição de Penalidades:
+
+    Living Penalty:
+
+        Adiciona-se recompensas negativas (Punições) para cada estado não final no ambiente.
+        Isso ajuda o agente a entender que ele não deve ficar "explorando" o ambiente sem tender a chegar no estado final,
+        pois a medida que ele vai explorando os estados não finais, sua recompensa vai sendo minimizada, 
+        e o agente deseja maximizar a sua recompensa.
+
+        Ou seja, quanto mais tempo o agente explora o ambiente, e mais transições de estado ele faz, mais ele é punido.
+
+        Isso pode fazer o agente querer se arriscar mais para chegar ao estado final, e evitar que sua recompensa final seja muito baixa,
+        já que o objetivo final do agente é maximizar a sua recompensa.
+
+        Tem que se tomar cuidado para não colocar uma penalidade muito alta,
+        pois isso pode fazer o agente decidir ir para um estado da morte (caso ele exista),
+        caso a penalidade por transição de estado seja por exemplo maior do que a penalidade de morrer.
+
+Q-Learning:
+
+    Em Q-Learning, olha-se para o valor Q (Qualidade) de cada ação A que gerá uma mudança de estado.
+    O objetivo é proucrar a ação de maior valor Q, essa será a ação escolhida pelo agente 
+    (Que pode não ocorrer em um cenário de busca não deterministica).
+    
+
+Diferença Temporal:
