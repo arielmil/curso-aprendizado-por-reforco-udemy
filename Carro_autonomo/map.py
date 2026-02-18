@@ -136,12 +136,12 @@ class Game(Widget):
 
         if sand[int(self.car.x),int(self.car.y)] > 0: # se o carro está na areia
             self.car.velocity = Vector(1, 0).rotate(self.car.angle) # diminui a velocidade de 6 para 1
-            last_reward = -1 # ganha uma recompensa negativa
+            last_reward = -2 # ganha uma recompensa negativa
         else: # caso contrário, se não estiver na areia
             self.car.velocity = Vector(6, 0).rotate(self.car.angle) # mantém a velocidade padrão de 6
-            last_reward = -0.2 # ganha uma recompensa negativa pequena
+            last_reward = -0.5 # ganha uma recompensa negativa pequena
             if distance < last_distance: # caso esteja chegando no objetivo
-                last_reward = 0.1 # ganha uma pequena recompensa positiva
+                last_reward = 0.5 # ganha uma pequena recompensa positiva
 
         if self.car.x < 10: # se o carro está no canto esquerdo
             self.car.x = 10 # posiciona o carro perto da parede
